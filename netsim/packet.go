@@ -1,4 +1,4 @@
-package main
+package netsim
 
 import (
 	"errors"
@@ -19,17 +19,18 @@ func NewEmptyPacket() *Packet {
 }
 
 func NewPacket(data []byte, dataType string) (*Packet, error) {
-	validDataTypes := map[string]bool{
-		"ClientHello":  true,
-		"ClientCom":    true,
-		"ClientClosed": true,
+	validDataTypes := []string{"ClientHello", "ClientCom", "ClientClosed"}
+	valid := false
+	for _, n := range validDataTypes {
+		if n == dataType {
+			valid = true
+		}
 	}
-	if !(validDataTypes[dataType]) {
-		emptyPacket := NewEmptyPacket()
-		return emptyPacket, errors.New("Invalid data type.")
+
+	if !valid {
+		return nil, errors.New("Invalid data type.")
 	} else if len(data) == 0 {
-		emptyPacket := NewEmptyPacket()
-		return emptyPacket, errors.New("Invalid data length.")
+		return nil, errors.New("Invalid data length.")
 	}
 
 	newPacket := &Packet{
@@ -39,5 +40,4 @@ func NewPacket(data []byte, dataType string) (*Packet, error) {
 	}
 
 	return newPacket, nil
-
 }

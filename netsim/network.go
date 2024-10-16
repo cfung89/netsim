@@ -1,19 +1,26 @@
-package main
+package netsim
 
 import (
 	"errors"
 )
 
 type Network struct {
+	Sink  *Node // not in Nodes array
 	Nodes []*Node
 }
 
-func NewNetwork() *Network {
-	return nil
+func NewNetwork(nodes []*Node) *Network {
+	return &Network{
+		Nodes: nodes,
+	}
 }
 
-func AddNode(node *Node) error {
-	return nil
+func (network *Network) SetSink(sink *Node) {
+	network.Sink = sink
+}
+
+func (network *Network) AddNode(node *Node) {
+	network.Nodes = append(network.Nodes, node)
 }
 
 func (network *Network) RemoveNode(node *Node) error {
