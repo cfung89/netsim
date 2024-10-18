@@ -10,16 +10,8 @@ type Packet struct {
 	Type   string
 }
 
-func NewEmptyPacket() *Packet {
-	return &Packet{
-		Data:   make([]byte, 0),
-		Length: 0,
-		Type:   "",
-	}
-}
-
 func NewPacket(data []byte, dataType string) (*Packet, error) {
-	validDataTypes := []string{"ClientHello", "ClientCom", "ClientClosed"}
+	validDataTypes := []string{"NetworkInit", "NetworkCom", "NetworkUpdate"}
 	valid := false
 	for _, n := range validDataTypes {
 		if n == dataType {

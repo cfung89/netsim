@@ -5,22 +5,28 @@ import (
 )
 
 type Network struct {
-	Sink  *Node // not in Nodes array
+	Sinks  []*Node
 	Nodes []*Node
 }
 
-func NewNetwork(nodes []*Node) *Network {
-	return &Network{
-		Nodes: nodes,
-	}
+func NewNetwork() *Network {
+	return &Network{}
 }
 
-func (network *Network) SetSink(sink *Node) {
-	network.Sink = sink
+func (network *Network) SetSink(sink *Node) error {
+    if sink.Properties.Type != "Sink" {
+        return errors.New("Not a sink node")
+    }
+	network.Sinks = append(network.Sinks, sink)
+    return nil
 }
 
 func (network *Network) AddNode(node *Node) {
-	network.Nodes = append(network.Nodes, node)
+    if node.Properties.Type == "Sink" {
+        network.SetSink(node)
+    } else {
+        network.Nodes = append(network.Nodes, node)
+    }
 }
 
 func (network *Network) RemoveNode(node *Node) error {
