@@ -2,6 +2,8 @@ package netsim
 
 import (
 	"errors"
+	"math"
+
 	"github.com/google/uuid"
 )
 
@@ -26,20 +28,25 @@ func NewGraph() *Graph {
 }
 
 func (g *Graph) AddDestination(dest *Node) {
-    g.Destinations = append(g.Destinations, dest.ID)
+	g.Destinations = append(g.Destinations, dest.ID)
 }
 
-func (g *Graph) AddNode(from *Node, to *Node, weight float64) {
+func (g *Graph) AddNode(from *Node, to *Node, weight float64) error {
+	if weight <= 0 {
+		return errors.New("Inputted weight is smaller or equal to 0")
+	}
 	newEdge := &Edge{
 		Node:   to,
 		Weight: weight,
 	}
-    val, ok := g.Adjacent[from.ID]
-    if ok {
-        g.Adjacent[from.ID] = append(g.Adjacent[from.ID], newEdge)
-    } else {
-        g.Adjacent[from.ID] = []*Edge{newEdge}
-    }
+	_, ok := g.Adjacent[from.ID]
+	if ok {
+		g.Adjacent[from.ID] = append(g.Adjacent[from.ID], newEdge)
+	} else {
+		g.Adjacent[from.ID] = []*Edge{newEdge}
+	}
+
+	return nil
 }
 
 func NetToGraph(network *Network, req *Requirements) (*Graph, error) {
@@ -51,31 +58,43 @@ func NetToGraph(network *Network, req *Requirements) (*Graph, error) {
 	}
 
 	graph := &Graph{
-		Adjacent:     make(map[uuid.UUID][]*Edge),
-		Destinations: network.Sinks,
+		Adjacent:     make(map[uuid.UUID][]*Edge, 0),
+		Destinations: make([]uuid.UUID, len(network.Sinks)),
+	}
+	for i, n := range network.Sinks {
+		graph.Destinations[i] = n.ID
 	}
 
-	arrNodes = append(network.Nodes, network.Sinks...)
+	arrNodes := append(network.Nodes, network.Sinks...)
 	for i, lnode := range arrNodes {
 		for j, rnode := range arrNodes {
-			if j > i && Dist(lnode.Location, rnode.Location) <= req.DistThreshold {
-				ledge = &Edge{
+			if j > i && Dist(lnode.Properties.Location, rnode.Properties.Location) <= req.DistThreshold {
+				// Edge for left node
+				ledge := &Edge{
 					Node:   rnode,
 					Weight: 0,
 					// Weight: calcWeight(lnode, rnode),
 				}
-				graph.Adjacent[lnode.ID] = append(graph.Adjacent[lnode.ID], edge)
 
-				redge = &Edge{
+				// Edge for right node
+				redge := &Edge{
 					Node:   lnode,
 					Weight: 0,
 					// Weight: calcWeight(rnode, lnode),
 				}
-				graph.Adjacent[rnode.ID] = append(graph.Adjacent[rnode.ID], edge)
+
+				lnode.Neighbours = append(lnode.Neighbours, ledge.Node)
+				graph.Adjacent[lnode.ID] = append(graph.Adjacent[lnode.ID], ledge)
+				graph.Adjacent[rnode.ID] = append(graph.Adjacent[rnode.ID], redge)
 			}
 		}
-		lnode.Neighbours = graph.Adjacent[lnode.ID]
 	}
 
 	return graph, nil
+}
+
+// Calculates the Euclidean distance between two points
+func Dist(loc1 [3]float64, loc2 [3]float64) float64 {
+	sum := math.Pow(loc1[0]-loc2[0], 2) + math.Pow(loc1[1]-loc2[1], 2) + math.Pow(loc1[2]-loc2[2], 2)
+	return math.Sqrt(sum)
 }
