@@ -2,15 +2,10 @@ package protocol
 
 import (
 	"errors"
-	"github.com/cfung89/sharp/netsim"
-	"github.com/google/uuid"
 	"math"
-)
 
-type Path struct {
-	Nodes  []*Node
-	Length float64
-}
+	"github.com/google/uuid"
+)
 
 // Conventional Dijkstra's single-source single-destination (CDSSSD) algorithm
 func Dijkstra(g Graph, source uuid.UUID) ([][]*Nodes, error) {

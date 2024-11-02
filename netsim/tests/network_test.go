@@ -13,11 +13,11 @@ func TestNetwork(t *testing.T) {
 	nodes := make([]*netsim.Node, length)
 	for i := range nodes {
 		random := rand.IntN(3)
-		var status string
+		var status netsim.NodeType
 		if random < 2 {
-			status = "Sensor"
+			status = netsim.Sensor
 		} else {
-			status = "Sink"
+			status = netsim.Sink
 		}
 
 		node, err := netsim.NewNode(status, rand.IntN(101), [3]float64{rand.Float64() * 1000, rand.Float64() * 1000, rand.Float64() * 1000})
@@ -34,7 +34,7 @@ func TestNetwork(t *testing.T) {
 	}
 	n.Stdout()
 
-	node, err := netsim.NewNode("Sensor", rand.IntN(101), [3]float64{rand.Float64() * 1000, rand.Float64() * 1000, rand.Float64() * 1000})
+	node, err := netsim.NewNode(netsim.Sensor, rand.IntN(101), [3]float64{rand.Float64() * 1000, rand.Float64() * 1000, rand.Float64() * 1000})
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -76,7 +76,7 @@ func TestNetwork(t *testing.T) {
 	// Test adding and removing nodes
 	for rep := 0; rep < repetitions; rep++ {
 
-		node, err = netsim.NewNode("Sensor", rand.IntN(101), [3]float64{rand.Float64() * 1000, rand.Float64() * 1000, rand.Float64() * 1000})
+		node, err = netsim.NewNode(netsim.Sensor, rand.IntN(101), [3]float64{rand.Float64() * 1000, rand.Float64() * 1000, rand.Float64() * 1000})
 		if err != nil {
 			t.Errorf(err.Error())
 		}
@@ -113,7 +113,7 @@ func TestNetwork(t *testing.T) {
 		}
 
 		var sink *netsim.Node
-		sink, err = netsim.NewNode("Sink", rand.IntN(101), [3]float64{rand.Float64() * 1000, rand.Float64() * 1000, rand.Float64() * 1000})
+		sink, err = netsim.NewNode(netsim.Sink, rand.IntN(101), [3]float64{rand.Float64() * 1000, rand.Float64() * 1000, rand.Float64() * 1000})
 		if err != nil {
 			t.Errorf(err.Error())
 		}

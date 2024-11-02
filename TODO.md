@@ -3,26 +3,30 @@
 - [x] Network Simulator
 
   - [x] Network (API)
-  - [ ] Node
+  - [x] Node
     - [x] API
-    - [ ] Transfer (Send and read)
-  - [ ] Packet
-    - [ ] API
-    - [ ] Packet implementation/configuration
-  - [ ] Testing
+    - [x] Transfer (Send and read)
+  - [x] Packet
+    - [x] API
+    - [x] Packet implementation
+  - [x] Testing
 
-- [ ] Graph
+- [x] Graph
 
-  - [ ] Graph implementation/API
-  - [ ] Network to graph
-  - [ ] Testing
+  - [x] Graph implementation/API
+  - [x] Network to graph
+  - [x] Testing
 
-- [ ] Protocol (SHARP)
+- [ ] Protocol
   - [ ] Initial configuration of nodes
-  - [ ] Node updating
-  - [ ] Dijkstra's algorithm: Conventional Dijkstra's single-source single-destination (CDSSSD)
+  - [x] Dijkstra's algorithm: Conventional Dijkstra's single-source multiple-destination (CDSSMD)
     - [ ] Testing Dijkstra implementation
-  - [ ] AES encryption
-  - [ ] Node authentication
-  - [ ] Benchmarking?
   - [ ] Testing (entire protocol)
+
+## Not Done
+
+- [ ] Node updating?
+- [ ] AES encryption
+- [ ] Node authentication
+- [ ] Benchmarking?
+- [ ] Better packet configuration

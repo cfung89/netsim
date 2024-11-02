@@ -8,8 +8,25 @@ import (
 	"github.com/google/uuid"
 )
 
+type NodeType string
+
+const (
+	Sink   NodeType = "Sink"
+	Sensor NodeType = "Sensor"
+)
+
+var validNodeTypes = map[NodeType]struct{}{
+	Sink:   {},
+	Sensor: {},
+}
+
+func isValidNodeType(nodeType NodeType) bool {
+	_, ok := validNodeTypes[nodeType]
+	return ok
+}
+
 type NodeProperties struct {
-	Type     string
+	Type     NodeType
 	Battery  int
 	Location [3]float64
 }
@@ -21,12 +38,12 @@ type Node struct {
 	Neighbours []*Node
 }
 
-func NewNode(status string, initBattery int, location [3]float64) (*Node, error) {
+func NewNode(status NodeType, initBattery int, location [3]float64) (*Node, error) {
 	if initBattery > 100 || initBattery < 0 {
 		return nil, errors.New("Invablid initial battery value.")
 	}
-	if status != "Sensor" && status != "Sink" {
-		return nil, errors.New("Unknown status.")
+	if !isValidNodeType(status) {
+		return nil, errors.New("Unknown node type.")
 	}
 
 	newNodeProperties := &NodeProperties{
@@ -36,7 +53,7 @@ func NewNode(status string, initBattery int, location [3]float64) (*Node, error)
 	}
 	newNode := &Node{
 		ID:         uuid.New(),
-		Channel:    make(chan *Packet),
+		Channel:    make(chan *Packet, 1),
 		Properties: newNodeProperties,
 		Neighbours: make([]*Node, 0),
 	}
@@ -46,16 +63,20 @@ func NewNode(status string, initBattery int, location [3]float64) (*Node, error)
 
 func (node *Node) Read() {
 	for {
-		if len(node.Channel) != 0 {
-			msg := <-node.Channel
-			log.Println(msg)
+		select {
+		case msg := <-node.Channel:
+			log.Println(fmt.Sprintf("%s", msg.Payload.Data))
+			if msg.Headers.Type == NetworkClose {
+				return
+			}
+		default:
 		}
 	}
 }
 
-func (node *Node) Send(packet *Packet, dest uuid.UUID) error {
+func (node *Node) Send(packet *Packet) error {
 	for _, n := range node.Neighbours {
-		if n.ID == dest {
+		if n.ID == packet.Headers.Path.Nodes[0].ID {
 			n.Channel <- packet
 			return nil
 		}

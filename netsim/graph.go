@@ -2,6 +2,7 @@ package netsim
 
 import (
 	"errors"
+	"fmt"
 	"math"
 
 	"github.com/google/uuid"
@@ -20,7 +21,12 @@ type Edge struct {
 // type CalcWeight func(*Node, *Node) float64
 
 type Requirements struct {
-	DistThreshold float64
+	MaxDist float64
+}
+
+type Path struct {
+	Nodes  []*Node
+	Length float64
 }
 
 func NewGraph() *Graph {
@@ -49,7 +55,7 @@ func (g *Graph) AddNode(from *Node, to *Node, weight float64) error {
 	return nil
 }
 
-func NetToGraph(network *Network, req *Requirements) (*Graph, error) {
+func NetToGraph(network *Network, req Requirements) (*Graph, error) {
 	if len(network.Nodes) == 0 {
 		return nil, errors.New("No nodes in network.")
 	}
@@ -68,7 +74,7 @@ func NetToGraph(network *Network, req *Requirements) (*Graph, error) {
 	arrNodes := append(network.Nodes, network.Sinks...)
 	for i, lnode := range arrNodes {
 		for j, rnode := range arrNodes {
-			if j > i && Dist(lnode.Properties.Location, rnode.Properties.Location) <= req.DistThreshold {
+			if j > i && Dist(lnode.Properties.Location, rnode.Properties.Location) <= req.MaxDist {
 				// Edge for left node
 				ledge := &Edge{
 					Node:   rnode,
@@ -83,7 +89,7 @@ func NetToGraph(network *Network, req *Requirements) (*Graph, error) {
 					// Weight: calcWeight(rnode, lnode),
 				}
 
-				lnode.Neighbours = append(lnode.Neighbours, ledge.Node)
+				lnode.Neighbours = append(lnode.Neighbours, rnode)
 				graph.Adjacent[lnode.ID] = append(graph.Adjacent[lnode.ID], ledge)
 				graph.Adjacent[rnode.ID] = append(graph.Adjacent[rnode.ID], redge)
 			}
@@ -91,6 +97,19 @@ func NetToGraph(network *Network, req *Requirements) (*Graph, error) {
 	}
 
 	return graph, nil
+}
+
+func (g *Graph) Stdout() string {
+	var s string
+	for i, n := range g.Adjacent {
+		var temp string
+		for _, e := range n {
+			temp += fmt.Sprintf(" ( %s, %.2f )", e.Node.ID, e.Weight)
+		}
+		s += fmt.Sprintf("%s: [ %s ]\n", i, temp)
+	}
+	fmt.Printf(s)
+	return s
 }
 
 // Calculates the Euclidean distance between two points
