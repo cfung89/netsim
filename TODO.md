@@ -18,13 +18,14 @@
   - [x] Testing
 
 - [ ] Protocol
-  - [ ] Initial configuration of nodes
+  - [ ] Initialize weights
   - [x] Dijkstra's algorithm: Conventional Dijkstra's single-source multiple-destination (CDSSMD)
     - [ ] Testing Dijkstra implementation
-  - [ ] Testing (entire protocol)
+  - [ ] Testing
 
 ## Not Done
 
+- [ ] Actual initial configuration of nodes
 - [ ] Node updating?
 - [ ] AES encryption
 - [ ] Node authentication

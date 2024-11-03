@@ -1,9 +1,7 @@
 package main
 
-import (
-	"fmt"
-)
+import "github.com/cfung89/sharp/protocol"
 
 func main() {
-    fmt.Println("Hello World")
+	protocol.Protocol(100)
 }

@@ -11,6 +11,7 @@ import (
 type Graph struct {
 	Adjacent     map[uuid.UUID][]*Edge
 	Destinations []uuid.UUID
+	Network      map[uuid.UUID]*Node
 }
 
 type Edge struct {
@@ -18,7 +19,7 @@ type Edge struct {
 	Weight float64
 }
 
-// type CalcWeight func(*Node, *Node) float64
+type CalcWeight func(*Node, *Node) float64
 
 type Requirements struct {
 	MaxDist float64
@@ -55,7 +56,7 @@ func (g *Graph) AddNode(from *Node, to *Node, weight float64) error {
 	return nil
 }
 
-func NetToGraph(network *Network, req Requirements) (*Graph, error) {
+func NetToGraph(network *Network, req Requirements, calcWeight CalcWeight) (*Graph, error) {
 	if len(network.Nodes) == 0 {
 		return nil, errors.New("No nodes in network.")
 	}
@@ -66,6 +67,7 @@ func NetToGraph(network *Network, req Requirements) (*Graph, error) {
 	graph := &Graph{
 		Adjacent:     make(map[uuid.UUID][]*Edge, 0),
 		Destinations: make([]uuid.UUID, len(network.Sinks)),
+		Network:      make(map[uuid.UUID]*Node, 0),
 	}
 	for i, n := range network.Sinks {
 		graph.Destinations[i] = n.ID
@@ -78,15 +80,13 @@ func NetToGraph(network *Network, req Requirements) (*Graph, error) {
 				// Edge for left node
 				ledge := &Edge{
 					Node:   rnode,
-					Weight: 0,
-					// Weight: calcWeight(lnode, rnode),
+					Weight: calcWeight(lnode, rnode),
 				}
 
 				// Edge for right node
 				redge := &Edge{
 					Node:   lnode,
-					Weight: 0,
-					// Weight: calcWeight(rnode, lnode),
+					Weight: calcWeight(rnode, lnode),
 				}
 
 				lnode.Neighbours = append(lnode.Neighbours, rnode)
@@ -94,6 +94,7 @@ func NetToGraph(network *Network, req Requirements) (*Graph, error) {
 				graph.Adjacent[rnode.ID] = append(graph.Adjacent[rnode.ID], redge)
 			}
 		}
+		graph.Network[lnode.ID] = lnode
 	}
 
 	return graph, nil
@@ -104,7 +105,7 @@ func (g *Graph) Stdout() string {
 	for i, n := range g.Adjacent {
 		var temp string
 		for _, e := range n {
-			temp += fmt.Sprintf(" ( %s, %.2f )", e.Node.ID, e.Weight)
+			temp += fmt.Sprintf(" ( %s, %.2f ) ", e.Node.ID, e.Weight)
 		}
 		s += fmt.Sprintf("%s: [ %s ]\n", i, temp)
 	}
